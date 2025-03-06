@@ -1,21 +1,22 @@
 <?php
+include 'db.php';
 
-// conectar de nuevo
-//$conn = new mysqli ($host,$user,$password,$database);
+$fecha_inicio = isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : ''; // Valor predeterminado
+$fecha_fin = isset($_GET['fecha_fin']) ? $_GET['fecha_fin'] : '';
 
-// REVISAR QUE NOMBRE BBDD COINCIDA
-//$sql = "SELECT * FROM "prueba_en_code";
-//$result = $conn->query($sql);
+$query = "SELECT id_venta, empresas.nombre AS empresa, ventas.numero_factura, ventas.fecha_venta,productos.producto AS producto, ventas.comprador, ventas.valor_total 
+          FROM ventas 
+          JOIN empresas ON ventas.empresa_id = id_empresa
+          JOIN productos ON ventas.producto_id = productos.id_producto";
 
+if (!empty($fecha_inicio) && !empty($fecha_fin)) {
+    $query .= " WHERE ventas.fecha_venta BETWEEN '$fecha_inicio' AND '$fecha_fin'";
+}
+$result = mysqli_query($conn, $query);
+$ventas = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-//  AÑADIR ESTA LINEA ANTES DE LA TR DE LOS TD: <?php foreach ($ventas as $venta): CIERRA PHP
-// AÑADIR ESTA LINEA ANTES DE LA TR DE LOS TD: <?php endforeach; CIERRA PHP
-//  AÑADIR ESTA LINEA EN value de INPUT FECHA INICIO <?= isset($_GET['fecha_inicio']) ? $_GET['fecha_inicio'] : ''  CIERRA PHP
-// AÑADIR ESTA LINEA EN value de INPUT FECHA FIN <?= isset($_GET['fecha_fin']) ? $_GET['fecha_fin'] : '' CIERRA PHP
 
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,12 +35,11 @@
     </header>
     <main>
         <form method="GET">
-            <label for="fecha_inicio">Desde:</label>
-            <input type="date" name="fecha_inicio" id="fecha_inicio" value="2024-01-02">
+            <label for="fecha_inicio">Fecha de inicio:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio">
 
-            <label for="fecha_fin">Hasta:</label>
-            <input type="date" name="fecha_fin" id="fecha_fin" value="2024-03-03">
-
+            <label for="fecha_fin">Fecha de fin:</label>
+            <input type="date" id="fecha_fin" name="fecha_fin">
             <button type="submit">Filtrar</button>
         </form>
 
@@ -49,24 +49,20 @@
                 <th>Factura num.</th>
                 <th>Fecha de Venta</th>
                 <th>Comprador</th>
+                <th>Producto</th>
                 <th>Valor Total</th>
             </tr>
 
             <tr>
-                <td>Empresa</td>
-                <td>1234</td>
-                <td>1-1-23</td>
-                <td>comprador</td>
-                <td>importe total</td>
+                <?php foreach ($ventas as $venta): ?>
+                    <td><?= htmlspecialchars($venta['empresa']) ?></td>
+                    <td><?= htmlspecialchars($venta['numero_factura']) ?></td>
+                    <td><?= htmlspecialchars($venta['fecha_venta']) ?></td>
+                    <td><?= htmlspecialchars($venta['comprador']) ?></td>
+                    <td><?= htmlspecialchars($venta['producto']) ?></td>
+                    <td><?= htmlspecialchars($venta['valor_total']) ?></td>
             </tr>
-            <tr>
-                <td>Empresa2</td>
-                <td>12345</td>
-                <td>1-1-23</td>
-                <td>comprador3</td>
-                <td>importe total</td>
-            </tr>
-
+        <?php endforeach; ?>
         </table>
     </main>
 

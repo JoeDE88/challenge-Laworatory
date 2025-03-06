@@ -10,20 +10,18 @@ if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 } 
 
-$sql = "CREATE DATABASE IF NOT EXISTS prueba_en_code;
-USE prueba_en_code;";
+$sql = "CREATE DATABASE IF NOT EXISTS base_de_datos;
+USE base_de_datos;";
 if (!mysqli_multi_query($conn, $sql)) {
     die("Error al crear la base de datos: " . mysqli_error($conn));
 }
 while (mysqli_next_result($conn)) {;};
 
-echo "Base de datos seleccionada correctamente...<br>";
-
-mysqli_select_db($conn, "prueba_en_code");
+mysqli_select_db($conn, "base_de_datos");
 
 $tabla_empresas = "CREATE TABLE IF NOT EXISTS empresas (
     id_empresa INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(200) NOT NULL,
+    nombre VARCHAR(200) NOT NULL UNIQUE,
     direccion VARCHAR(200) NOT NULL,
     nif VARCHAR(20) NOT NULL
 )";
@@ -39,7 +37,7 @@ $tabla_ventas = "CREATE TABLE IF NOT EXISTS ventas (
     empresa_id INT,
     producto_id INT,
     cantidad INT,
-    numero_factura VARCHAR(50) NOT NULL,
+    numero_factura VARCHAR(50) NOT NULL UNIQUE,
     fecha_venta DATE NOT NULL,
     comprador VARCHAR(200) NOT NULL,
     valor_total DECIMAL(10,2) NOT NULL,
@@ -50,8 +48,6 @@ $tabla_ventas = "CREATE TABLE IF NOT EXISTS ventas (
 mysqli_query($conn, $tabla_empresas) or die("Error al crear la tabla 'empresas': " . mysqli_error($conn));
 mysqli_query($conn, $tabla_productos) or die("Error al crear la tabla 'productos': " . mysqli_error($conn));
 mysqli_query($conn, $tabla_ventas) or die("Error al crear la tabla 'ventas': " . mysqli_error($conn));
-
-echo "Tablas 'creadas' creada con éxito...<br>";
 
 $empresas_sql = "INSERT IGNORE INTO empresas (nombre, direccion, nif) VALUES
     ('Empresa A', 'Calle Lagasca 105, Madrid', 'A11111'),
@@ -79,6 +75,8 @@ $ventas_sql = "INSERT IGNORE INTO ventas (empresa_id, producto_id, cantidad, num
     (3, 1, 2, 'FAC-000013', '2025-03-02', 'Cliente 5', 20.00),
     (4, 1, 3, 'FAC-000014', '2025-01-02', 'Cliente X', 30.00);";
 
-mysqli_close($conn);
-echo "Conexión cerrada. El proceso ha finalizado correctamente.<br>";
+mysqli_query($conn, $empresas_sql) or die("Error insertando datos en 'empresas': " . mysqli_error($conn));
+mysqli_query($conn, $productos_sql) or die("Error insertando datos en 'productos': " . mysqli_error($conn));
+mysqli_query($conn, $ventas_sql) or die("Error insertando datos en 'ventas': " . mysqli_error($conn));
+
 ?>
